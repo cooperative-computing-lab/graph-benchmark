@@ -1,0 +1,12 @@
+quantity: 37944 
+calculated degrees:
+sorted: 895bd0 
+cpy to hbw 6740e040 
+OpenMP 1: 86.884404
+OpenMP 2: 65.165277
+OpenMP 4: 38.345923
+OpenMP 8: 20.457308
+OpenMP 16: 10.549959
+OpenMP 32: 5.353396
+OpenMP 64: 2.809734
+OpenMP 128: 1.556387
