@@ -1,6 +1,6 @@
 The following commands will build and install the software:
 
-   make
+	 make
 
 After running make, you may be prompted with an interface
 asking you to run a configuration procedure (hotkey 'c')
