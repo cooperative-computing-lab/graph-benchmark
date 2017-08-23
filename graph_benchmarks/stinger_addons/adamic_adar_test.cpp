@@ -142,7 +142,10 @@ main (int argc, char *argv[])
 
     printf("%d, %d, %lu \n", 1<<2, 1<<16, 1<<31);
     int64_t timestamp = 1;
+	char *file_name = argv[1];
+	if(!file_name) { fprintf(stderr, "File name could not be set.\n"); return 1; }
 	FILE* f = fopen(argv[1], "rb");
+	if(!f) { fprintf(stderr, "File %s could not be opened.\n", file_name); return 1; }
 	int a, b;
 	while(fscanf(f, " %i %i", &a, &b) == 2) {
 		printf("A: %d B: %d\n", a, b);

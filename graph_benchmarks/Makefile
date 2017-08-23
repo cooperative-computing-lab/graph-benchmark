@@ -1,4 +1,4 @@
-ALL_CFLAGS := -std=c99 -D_POSIX_C_SOURCE=200809L -fopenmp -g -lmemkind $(CFLAGS)
+ALL_CFLAGS := -std=c99 -D_POSIX_C_SOURCE=200809L -fopenmp -g -lmemkind -O3 $(CFLAGS)
 
 BENCHMARK_CSRC := benchmark.c cluster_coeff.c graph.c null_sort.c jaccard.c degree_sort.c
 BENCHMARK_OBJS := $(addprefix obj/, $(BENCHMARK_CSRC:.c=.o))

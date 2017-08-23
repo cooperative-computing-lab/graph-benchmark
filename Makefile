@@ -16,8 +16,15 @@ build: $(STINGER) $(BENCH)
 
 stinger: $(STINGER)
 
-bench:
+bench: $(STINGER) $(BENCH)
+	export KMP_AFFINITY=verbose,granularity=core,compact
+	export OMP_NUM_THREADS=256
 	cd ./graph_benchmarks && ./run.sh
+
+adar: $(STINGER) $(BENCH)
+	export KMP_AFFINITY=verbose,granularity=core,compact
+	export OMP_NUM_THREADS=256
+	./stinger/build/bin/stinger_adamic_adar_test ./graph_benchmarks/soc-Slashdot0811.txt
 
 clean:
 	rm -rf stinger
