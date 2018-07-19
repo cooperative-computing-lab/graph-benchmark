@@ -1,6 +1,7 @@
 Scale-free graph generator using similar techniques to R-MAT Graph500 generator. The main differences from the Graph500 generator are the addition of noise to the process for smoother distributions of edges and extending the idea to generate bipartite graphs.
 
 The following command will generate a bipartite graph:
+
 `python generate.py <scale_l> <scale_r> <edge_factor> -o <outfile> --cover --weight --visual`
 
 The size of the graph is determined by the first three mandatory arguments:
@@ -13,6 +14,7 @@ The remaining optional arguments determine the following:
 * -c, -\-cover : The sets of vertices will contain all elements from 1 to N, without missing elements.
 * -w, -\-weight : The graphs will have weighted edges.
 * -v, -\-visual : Pyplot will be utilized to visualize the degree distribution of the generated graph.
+* -r, -\-random : Whether or not to generate random probabilities within R-MAT.
 
 **Notes about -\-cover argument**: If the -\-cover argument is not used, the size of the generated graph may fluctuate greatly around your original input parameters due to the stochasticity and duplication of edges. Using it will generate a graph closer to your input parameters, however, it may cause more possible matches than are desirable.
 

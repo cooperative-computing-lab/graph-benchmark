@@ -2,6 +2,7 @@ import numpy as np
 import random
 import matplotlib.pyplot as plt
 from collections import defaultdict
+import csv
 
 
 class Graph:
@@ -25,18 +26,18 @@ class Graph:
 	# Generates a graph with number of vertices as 2^scale, respectively. The
 	# total number of edges will be approx. edge_factor * 2^scale. 
 	# Returns: edge list as numpy array of dimensions 3 x edgeCount
-	def generate_graph( self ):
+	def generate_graph( self, rand_probs ):
 		self.bipartite = False
 		N = 2 ** self.scale_l
 		M = self.edge_factor * N
+		noise = 0.08
 
 		#A, B, C, and D determine the shape of the degree distribution.
 		#noise determines the amount of smoothing to be applied to distribution.
-		A = 0.57
-		B = 0.19
-		C = 0.19
-		D = 0.05
-		noise = 0.08
+		if rand_probs:
+			A, B, C, D = rand_probs()
+		else:
+			A = 0.57; B = 0.19; C = 0.19; D = 0.05
 
 		i = np.zeros(M)
 		j = np.zeros(M)
@@ -45,6 +46,8 @@ class Graph:
 			ab = A + B
 			c_norm = C/(1 - (A + B))
 			a_norm = A/(A + B)
+
+			#Apply noise at each level to remove oscillations
 			u = random.uniform( -noise, noise )
 			A = A - ((2 * u * A)/(A + D))
 			B = B + u
@@ -85,7 +88,7 @@ class Graph:
 	# covered: Indicates whether or not vertices from 1..(2^scale) should all
 	#					 exist in the graph. Ex: [1, 3, 2, 4] vs. [1, 3, 4]
 	# Returns: edge list as numpy array of dimensions 3 x edgeCount
-	def generate_bipartite( self, covered ):
+	def generate_bipartite( self, covered, rand_probs ):
 		self.bipartite = True
 		N = 2 ** self.scale_l
 		P = 2 ** self.scale_r
@@ -95,17 +98,12 @@ class Graph:
 		#These determine the shape of the degree distribution for left set.
 		#noise determines the amount of smoothing to be applied to distribution
 		#For a somewhat realistic baseline use [0.57, 0.19, 0.19, 0.05]
-		A_I = 0.57
-		B_I = 0.19
-		C_I = 0.19
-		D_I = 0.05
-
-		#These determine the shape of the degree distribution for right set.
-		#noise determines the amount of smoothing to be applied to distribution
-		A_O = 0.57
-		B_O = 0.19
-		C_O = 0.19
-		D_O = 0.05
+		if rand_probs:
+			A_I, B_I, C_I, D_I = get_probs()
+			A_O, B_O, C_O, D_O = get_probs()
+		else:
+			A_I = 0.57; B_I = 0.19; C_I = 0.19; D_I = 0.05
+			A_O = 0.57; B_O = 0.19; C_O = 0.19; D_O = 0.05
 
 		i = np.zeros(M)
 		j = np.zeros(M)
@@ -174,17 +172,17 @@ class Graph:
 		perm_P = np.random.permutation(P)
 		edge_list[1, :] = 1 + perm_P[ edge_list[1, :].astype(int) ]
 		perm = np.random.permutation(edge_list[0].size)
-		edge_list = edge_list[:, perm]
+		edge_list = edge_list[:, perm].astype(int)
 
 		self.edge_list = edge_list
 
 
 
-	# Writes adjacency list to a file in the form of:
-	# N, P, M
-	# -1 [24, 23]
-	# -32 [6]
-	# -31 [19, 6, 31]
+	# Writes adjacency list to a file in the form a csv:
+	# N,P,M
+	# -1,24,23
+	# -32,6
+	# -31,19,4,31
 	# 
 	# adj_list : Adjacency list to be written
 	# left : number of vertices in the left set
@@ -196,17 +194,18 @@ class Graph:
 			self.adj_list = to_adj_list(self.edge_list)
 
 		with open(filename, 'w') as outfile:
-			outfile.write(str(self.left) + ',' + str(self.right) + ','
-										+ str(self.edges) + '\n')
+			stats = [self.left, self.right, self.edges]
+			writer = csv.writer(outfile, lineterminator='\n')
+			writer.writerow(stats)
 			for i in self.adj_list:
-				outfile.write(str(i) + ' ' + str(self.adj_list[i]) + '\n')
+				writer.writerow([i] + self.adj_list[i])
 
 
-	# Writes edge list to a file in the form of:
-	# N, P, M
-	# -16 11
-	# -4 8
-	# -25 15
+	# Writes edge list to a file in the form of csv:
+	# N,P,M
+	# -16,11
+	# -4,8
+	# -25,15
 	#
 	# edge_list : Edge list to be written
 	# left : number of vertices in the left set
@@ -218,12 +217,15 @@ class Graph:
 			exit('Graph has not been generated!\n')
 
 		with open(filename, 'w') as outfile:
-			outfile.write(str(self.left) + ',' + str(self.right) + ','
-										+ str(self.edges) + '\n')
+			stats = [self.left, self.right, self.edges]
+			writer = csv.writer(outfile, lineterminator='\n')
+			writer.writerow(stats)
 			for i in range(self.edges):
-				outfile.write(str(int(self.edge_list[0][i])) + ' ' 
-											+ str(int(self.edge_list[1][i])))
-				outfile.write(' \n')
+				#outfile.write(str(int(self.edge_list[0][i])) + ' ' 
+				#							+ str(int(self.edge_list[1][i])))
+				#outfile.write(' \n')
+				writer.writerow(self.edge_list[:,i])
+
 
 	# Prints the general statistics of the generated graph such as counts of
 	# edges, vertices, and degree
@@ -300,7 +302,6 @@ class Graph:
 		plt.show()
 
 
-
 	# Plots the degree distribution in a scatter plot
 	def plot_distribution( self ):
 		if self.bipartite == True:
@@ -309,14 +310,14 @@ class Graph:
 			unique_r, frequency_r = np.unique(count_r, return_counts=True)
 			fig, (deg_l, deg_r) = plt.subplots(1, 2, figsize=(10, 4.5))
 
-			deg_l.scatter( unique_l, frequency_l, s=0.4 )
+			deg_l.scatter( unique_l, frequency_l, s=0.6 )
 			deg_l.set_title( 'Left Set' )
 			deg_l.set_xlabel('Degree')
 			deg_l.set_ylabel('Frequency')
 			deg_l.set_xscale('log')
 			deg_l.set_yscale('log')
 
-			deg_r.scatter( unique_r, frequency_r, s=0.4 )
+			deg_r.scatter( unique_r, frequency_r, s=0.6 )
 			deg_r.set_title( 'Right Set' )
 			deg_r.set_xlabel('Degree')
 			deg_r.set_ylabel('Frequency')
@@ -328,16 +329,35 @@ class Graph:
 		else:
 			count_O, count_I = degree(self.edge_list)
 			unique_x, frequency_x = np.unique(count_O, return_counts=True)
+			fig, ax = plt.subplots(figsize=(5.35, 4.13))
+			color = np.asarray([[0, 0.2, 1]])
+			lab_size = 15
+			tick_w = 0.45
+			min_tick = 7
+			maj_tick = 15
 
-			plt.scatter( unique_x, frequency_x, s=0.4 )
-			plt.xlabel('Degree')
-			plt.ylabel('Frequency')
-			plt.xscale('log')
-			plt.yscale('log')
-			plt.suptitle('Degree Distribution of Graph')
+			ax.scatter( unique_x, frequency_x, s=14, marker='.', c=color)
+			ax.set_xlabel('Degree (d)', fontsize=lab_size)
+			ax.set_ylabel('Frequency', fontsize=lab_size)
+			ax.set_xscale('log')
+			ax.set_yscale('log')
+			ax.tick_params(axis='y', which='major', direction='in', labelsize=lab_size,
+										 length=maj_tick, width=tick_w)
+			ax.tick_params(axis='x', which='major', direction='in', labelsize=lab_size,
+										 length=maj_tick, width=tick_w)
+			ax.tick_params(axis='y', which='minor', direction='in', labelsize=lab_size,
+										 length=min_tick, width=tick_w )
+			ax.tick_params(axis='x', which='minor', direction='in', labelsize=lab_size,
+										 length=min_tick, width=tick_w)
+			ax.xaxis.set_ticks_position('both')
+			ax.yaxis.set_ticks_position('both')
+			ax.set_ylim(0, 10**5)
+			ax.set_xlim(0, 10**4)
+			#fig.suptitle('Degree Distribution of Graph')
+			fig.savefig('../Visuals/temp.png', dpi=fig.dpi)
 
+		plt.tight_layout()
 		plt.show()
-
 
 
 ############################# HELPER FUNCTIONS #############################
@@ -411,3 +431,10 @@ def degree( edge_list ):
 	unique_i, counts_i = np.unique(edge_list[0,:], return_counts=True)
 	unique_j, counts_j = np.unique(edge_list[1,:], return_counts=True)
 	return counts_i, counts_j
+
+# Returns random probabilities for the R-MAT algorithm.
+def get_probs():
+	a = random.uniform(0.45, 0.6)
+	b = c = random.uniform(0.1, 0.2)
+	d = 1 - (a + b + c)
+	return a, b, c, d
