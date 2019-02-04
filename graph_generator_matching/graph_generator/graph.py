@@ -93,6 +93,7 @@ class Graph:
 		N = 2 ** self.scale_l
 		P = 2 ** self.scale_r
 		M = ((self.edge_factor-2) * N) / 2
+		M = int(M)
 		noise = 0.05
 
 		#These determine the shape of the degree distribution for left set.
@@ -105,8 +106,8 @@ class Graph:
 			A_I = 0.57; B_I = 0.19; C_I = 0.19; D_I = 0.05
 			A_O = 0.57; B_O = 0.19; C_O = 0.19; D_O = 0.05
 
-		i = np.zeros(M)
-		j = np.zeros(M)
+		i = np.zeros(int(M))
+		j = np.zeros(int(M))
 
 		# Generate vertices present in left set
 		for c in range(self.scale_l):
@@ -121,16 +122,15 @@ class Graph:
 			C_I = C_I + u
 			D_I = D_I - ((2 * u * D_I)/(A_I + D_I))
 
-			i_bit = np.random.rand(1, M) > ab_I
-			j_bit = np.greater( np.random.rand(1, M),
-												((c_norm_I * i_bit) + (a_norm_I * ~i_bit)) )
+			i_bit = np.random.rand(1, int(M)) > ab_I
+			j_bit = np.greater( np.random.rand(1, int(M)),((c_norm_I * i_bit) + (a_norm_I * ~i_bit)) )
 			i = i + 2**(c) * i_bit
 			j = j + 2**(c) * j_bit
 
 		ij = np.append(i, j, axis=1)
 
-		a = np.zeros(M)
-		b = np.zeros(M)
+		a = np.zeros(int(M))
+		b = np.zeros(int(M))
 
 		# Generate vertices present in right set
 		for d in range(self.scale_r):
@@ -145,9 +145,8 @@ class Graph:
 			C_O = C_O + u
 			D_O = D_O - ((2 * u * D_O)/(A_O + D_O))
 
-			a_bit = np.random.rand(1, M) > ab_O
-			b_bit = np.greater( np.random.rand(1, M), 
-												((c_norm_O * a_bit) + (a_norm_O * ~a_bit)) )
+			a_bit = np.random.rand(1, int(M)) > ab_O
+			b_bit = np.greater( np.random.rand(1, int(M)), ((c_norm_O * a_bit) + (a_norm_O * ~a_bit)) )
 			a = a + 2**(d) * a_bit
 			b = b + 2**(d) * b_bit
 
@@ -243,23 +242,23 @@ class Graph:
 			self.ave_degree = 2*self.edges / float(self.vertex_count)
 			self.left_degree = self.edges / float(self.left)
 			self.right_degree = self.edges / float(self.right)
-			print 'Average degree of entire graph:', self.ave_degree
-			print 'Average degree of left:', self.left_degree
-			print 'Average degree of right:', self.right_degree, '\n'
-			print 'Total number of vertices:', self.vertex_count
-			print 'Number of vertices in left:', self.left
-			print 'Number of vertices in right:', self.right
-			print 'Number of edges:', self.edges, '\n'
+			print('Average degree of entire graph:', self.ave_degree)
+			print('Average degree of left:', self.left_degree)
+			print('Average degree of right:', self.right_degree, '\n')
+			print('Total number of vertices:', self.vertex_count)
+			print('Number of vertices in left:', self.left)
+			print('Number of vertices in right:', self.right)
+			print('Number of edges:', self.edges, '\n')
 		else:
 			self.vertex_count = count_O.size
 			self.ave_degree = 2*self.edges / float(count_O.size + count_I.size)
 			self.in_degree = self.edges / float(count_I.size)
 			self.out_degree = self.edges / float(count_O.size)
-			print 'Average degree of entire graph', self.ave_degree
-			print 'Average outdegree:', self.out_degree
-			print 'Average indegree:', self.in_degree
-			print 'Total number of vertices:', self.vertex_count
-			print 'Number of edges:', self.edges, '\n'
+			print('Average degree of entire graph', self.ave_degree)
+			print('Average outdegree:', self.out_degree)
+			print('Average indegree:', self.in_degree)
+			print('Total number of vertices:', self.vertex_count)
+			print('Number of edges:', self.edges, '\n')
 
 
 	# Plots a histogram of degree distribution

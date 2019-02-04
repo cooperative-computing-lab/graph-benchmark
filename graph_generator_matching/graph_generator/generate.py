@@ -20,9 +20,9 @@ def main( args ):
 		adj_outfile = 'adj_%dx%dx%d.csv' % (scale_l, scale_r, edge_factor)
 		edge_outfile = 'edge_%dx%dx%d.csv' % (scale_l, scale_r, edge_factor)
 
-	print '\nCovered :', covered
-	print 'Random :', rand_probs
-	print 'Weighted :', weighted, '\n'
+	print('\nCovered :', covered)
+	print('Random :', rand_probs)
+	print('Weighted :', weighted, '\n')
 
 
 	#############################################################################
